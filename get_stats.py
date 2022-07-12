@@ -2,12 +2,14 @@
 import pandas as pd
 
 
-def get_data(year):
+def get_data(year, playoffs=False):
     """Get the data for the season corresponding to the specified year"""
     link = f'https://www.nbastuffer.com/{year}-{year + 1}-nba-player-stats/'  # data source
-    df = pd.read_html(link)[0]
-    df = clean_data(df, year)
-    return df
+    df = pd.read_html(link)
+    if playoffs:  # return either playoff or regular season data
+        return clean_data(df[0], year)
+    else:
+        return clean_data(df[1], year)
 
 
 def clean_data(d, year):
@@ -47,9 +49,9 @@ def clean_data(d, year):
     return d
 
 
-def get_full_dataframe():
+def get_full_dataframe(playoffs=False):
     """Join all the data into one dataframe"""
-    data = [get_data(i) for i in range(2017, 2022)]  # all data from 2017-2018 to 2021-2022 seasons
+    data = [get_data(i, playoffs) for i in range(2018, 2022)]  # all data from 2017-2018 to 2021-2022 seasons
 
     # add all data from 2017-2018 to 2021-2022 seasons into one dataframe
     # print([d.shape for d in data])
