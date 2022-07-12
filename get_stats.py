@@ -2,28 +2,24 @@
 import pandas as pd
 
 
-def get_data(year, playoffs=False):
-    """Get the data for the season corresponding to the specified year"""
+def nbastuffer_data(year, playoffs=False):
+    """Get and clean the data for the season corresponding to the specified year"""
     link = f'https://www.nbastuffer.com/{year}-{year + 1}-nba-player-stats/'  # data source
-    df = pd.read_html(link)
-    if playoffs:  # return either playoff or regular season data
-        return clean_data(df[0], year)
+    if playoffs:
+        df = pd.read_html(link)[0]
     else:
-        return clean_data(df[1], year)
+        df = pd.read_html(link)[1]
 
-
-def clean_data(d, year):
-    """Clean the specified dataframe for the specified year"""
-    d['Year'] = year  # initial year
+    df['Year'] = year  # initial year
 
     if year in [2019, 2020, 2021]:
-        d = d.rename(columns={
+        d = df.rename(columns={
             "TO%Turnover RateA metric that estimates the number of turnovers a player commits per 100 possessions": "TO%"})
     elif year == 2018:
-        d = d.rename(columns={
+        d = df.rename(columns={
             "Tor%Turnover RateA metric that estimates the number of turnovers a player commits per 100 possessions": "TO%"})
     else:  # year == 2017:
-        d = d.rename(columns={
+        d = df.rename(columns={
             "TOrTurnover RateA metric that estimates the number of turnovers a player commits per 100 possessions": "TO%"})
 
     # clean up the verbose column names
@@ -49,9 +45,9 @@ def clean_data(d, year):
     return d
 
 
-def get_full_dataframe(playoffs=False):
+def nbastuffer_dataframe(playoffs=False):
     """Join all the data into one dataframe"""
-    data = [get_data(i, playoffs) for i in range(2018, 2022)]  # all data from 2017-2018 to 2021-2022 seasons
+    data = [nbastuffer_data(i, playoffs) for i in range(2018, 2022)]  # all data from 2017-2018 to 2021-2022 seasons
 
     # add all data from 2017-2018 to 2021-2022 seasons into one dataframe
     # print([d.shape for d in data])
@@ -60,10 +56,25 @@ def get_full_dataframe(playoffs=False):
     return df
 
 
-def main():
-    stats_data = get_full_dataframe()
-    # print(stats_df)
+def basketballreference_data(year):
+    """Get the data for the season corresponding to the specified year"""
+    link = f'https://www.basketball-reference.com/leagues/NBA_{year}_advanced.html'  # data source
+    df = pd.read_html(link)[0]
+    df['Year'] = year  # initial year
+    return df
 
+
+def basketballreference_dataframe(start_year, end_year):
+    """Join all the data into one dataframe"""
+    data = [basketballreference_data(i) for i in range(start_year, end_year + 1)]  # all data from start to end year
+    # all data from start to end year seasons into one dataframe
+    # print([d.shape for d in data])
+    df = pd.concat([d for d in data], ignore_index=True)
+    return df
+
+
+def main():
+    var = 0
     # print(stats_df.isnull().sum(), '\n')
     # print(stats_df.isnull().sum(axis=1).sort_values(ascending=False))
 
